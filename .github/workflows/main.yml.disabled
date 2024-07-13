@@ -1,0 +1,161 @@
+name: Deploy Boilerpate Nuxt Prod to DO Droplet
+
+#TODO rename file to remove [.disabled]
+
+on:
+  push: 
+     branches: ["main"]
+
+env:
+  DOMAIN: example.come
+  ENVIRONMENT: Production
+  NAME: "Boilerpate Nuxt - Frontend"
+  BASE_URL: api.example.com
+  PROJECT_DIR: /var/www/html/frontend
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  # will be updated with {{av_port}} logic
+  MAIN_NUXT_PORT: 3000
+  NODE_VERSION: 18
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.commit-details.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get version (short SHA and current date time)
+        id: commit-details
+        run: |
+          short_sha=$(git rev-parse --short HEAD)
+          date_time=$(date '+%d-%m-%y-%H-%M')
+          echo "version=$short_sha-$date_time" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js and Cache PNPM
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --force --config.platform=linux --config.architecture=x64
+
+      - name: Create .env file
+        run: |
+          echo "SITE_URL=https://${{ env.DOMAIN }}" >> .env
+          echo "BASE_URL=https://${{ env.BASE_URL }}" >> .env
+          echo "MAIN_NUXT_PORT=" >> .env
+
+      - name: Build the app
+        run: pnpm  build
+
+      - name: Remove .git folder
+        run: rm -rf .git
+
+      - name: Deploy to Digital Ocean
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          rm: true
+          source: .
+          target: ${{ env.PROJECT_DIR }}/${{ env.DOMAIN }}
+          strip_components: 1
+
+      - name: Restart the app (nginx and pnpm)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            # Change working directory
+              cd ${{ env.PROJECT_DIR }}/${{ env.DOMAIN }}
+
+              # Ensure all global packages are loaded up zsh shell, especially nvm
+              source ~/.zshrc
+
+              # Pick an available port on server
+              av_port=$(shuf -i 7700-7799 -n 1)
+              while [[ "$(lsof -i :$av_port)" ]]; do
+                av_port=$(shuf -i 7700-7799 -n 1)
+              done
+
+              # Update port on .env
+              sed -i "s/MAIN_NUXT_PORT=[0-9]*/MAIN_NUXT_PORT=${av_port}/" .env
+
+              # Update port on conf
+              sed -i "s/proxy_pass http:\/\/localhost:[0-9]*/proxy_pass http:\/\/localhost:${av_port}/" '/etc/nginx/sites-enabled/${{ env.DOMAIN }}.conf'
+
+              # Install Node Version  & PM2 on said Node Version
+              nvm install ${{ env.NODE_VERSION }}
+              nvm use ${{ env.NODE_VERSION }}
+              npm install -g pm2
+
+              # Clear domain PM2 logs
+              pm2 flush ${{ env.DOMAIN }}
+
+              # Delete old instance
+              pm2 delete ${{ env.DOMAIN }}
+
+             # Restart app with PM2
+              pm2 reload ecosystem.config.js --only ${{ env.DOMAIN }}
+
+              # Save/Synchronize changes
+              pm2 save
+
+              # Restart nginx
+
+             echo "${{env.PASSWORD}}" > ~/.sudo_password
+             chmod 600 ~/.sudo_password
+             sudo -S service nginx restart  < ~/sudo_password
+
+             rm  ~/.sudo_password
+
+      - name: Send deployment completed notification
+        uses: someimportantcompany/github-actions-slack-message@v1
+        with:
+          webhook-url: ${{ env.SLACK_WEBHOOK_URL }}
+          color: good
+          text: |
+            :tada: *Deployment successful! `${{ env.NAME }}` on `${{ env.ENVIRONMENT }}` environment*
+            - *Version* : `${{ steps.commit-details.outputs.version }}`
+
+  notify-on-failure:
+    if: failure()
+    needs:
+      - build-and-deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send failure notification
+        uses: someimportantcompany/github-actions-slack-message@v1
+        with:
+          webhook-url: ${{ env.SLACK_WEBHOOK_URL }}
+          color: failure
+          text: |
+            :x: *Oh no! Deployment failed! `${{ env.NAME }}` on `${{ env.ENVIRONMENT }}` environment*
+            - Please check the action workflow logs!*
+
+            - *Version* : `${{ needs.build-and-deploy.outputs.version }}`
