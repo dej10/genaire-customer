@@ -18,10 +18,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
-  "dependencies": {},
   "devDependencies": {
     "@antfu/eslint-config": "^2.12.1",
-    "@nuxt/devtools": "1.1.5",
+    "@nuxtjs/google-fonts": "^3.2.0",
     "@nuxtjs/tailwindcss": "6.11.4",
     "daisyui": "4.9.0",
     "dayjs": "1.11.10",

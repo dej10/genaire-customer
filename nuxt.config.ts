@@ -1,13 +1,36 @@
 /** Module Options */
+import headScripts from './commons/head-scripts'
+
 const lodashOptions = {
   prefix: 'lodash',
   prefixSkip: false
 }
-
 export default defineNuxtConfig({
   pages: true,
 
-  css: ['~/assets/css/others/main.css'],
+  app: {
+    head: {
+      bodyAttrs: {
+        class: 'body',
+      },
+    },
+    script: headScripts() as any
+  },
+
+  css: [
+    '@/assets/css/normalize.css',
+    '@/assets/css/webflow.css',
+    '@/assets/css/genaire-restake.webflow.css',
+    // '~/assets/css/others/main.css'
+  ],
+
+  // vite: {
+  //   server: {
+  //     hmr: {
+  //       clientPort: 3002
+  //     }
+  //   }
+  // },
 
   devServer: {
     port: 3002
@@ -20,7 +43,11 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: ['@nuxtjs/tailwindcss', ['nuxt-lodash', lodashOptions]],
+  modules: [
+    // '@nuxtjs/tailwindcss',
+    ['nuxt-lodash', lodashOptions],
+    '@nuxtjs/google-fonts'
+  ],
 
   routeRules: {
     '/nitro/**': { proxy: '/api/**' }
@@ -33,6 +60,21 @@ export default defineNuxtConfig({
     '~/components/widgets',
     '~/components'
   ],
+
+  googleFonts: {
+    families: {
+      Poppins: {
+        wght: [300, 400, 600, 700, 800, 900],
+      },
+    },
+    subsets: ['latin'],
+    display: 'swap',
+    prefetch: false,
+    preconnect: false,
+    preload: false,
+    download: true,
+    base64: false,
+  },
 
   tailwindcss: {
     cssPath: ['~/assets/css/tailwind/main.css', { injectPosition: 'first' }],
