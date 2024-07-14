@@ -1,4 +1,5 @@
 /** Module Options */
+import process from 'node:process'
 import headScripts from './commons/head-scripts'
 
 const lodashOptions = {
