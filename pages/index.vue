@@ -144,10 +144,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  // Component options
-}
+<script  setup lang="ts">
+
 </script>
 
 <style scoped>

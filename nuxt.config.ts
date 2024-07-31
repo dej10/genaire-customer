@@ -47,7 +47,8 @@ export default defineNuxtConfig({
   modules: [
     // '@nuxtjs/tailwindcss',
     ['nuxt-lodash', lodashOptions],
-    '@nuxtjs/google-fonts'
+    '@nuxtjs/google-fonts',
+    '@wagmi/vue/nuxt'
   ],
 
   routeRules: {
