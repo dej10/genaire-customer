@@ -42,4 +42,10 @@ if (appENV === 'staging' || appENV === 'local') {
     ]
   })
 }
+
+// nuxt.hook('vite:extendConfig', (config) => {
+//   config.optimizeDeps ??= {}
+//   config.optimizeDeps.include = config.optimizeDeps.include || []
+//   config.optimizeDeps.include.push('@wagmi/vue')
+// })
 </script>

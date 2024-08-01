@@ -1,5 +1,7 @@
 <template>
-  <div>Address: {{ address }}</div>
+  <div class="">
+    Address: {{ address }}
+  </div>
   <div>Connected to {{ connector?.name }} Connector.</div>
   <button @click="disconnect()">
     Disconnect

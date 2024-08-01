@@ -23,4 +23,3 @@ declare module '@wagmi/vue' {
     config: typeof config
   }
 }
-d

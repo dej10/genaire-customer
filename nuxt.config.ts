@@ -25,14 +25,6 @@ export default defineNuxtConfig({
     // '~/assets/css/others/main.css'
   ],
 
-  // vite: {
-  //   server: {
-  //     hmr: {
-  //       clientPort: 3002
-  //     }
-  //   }
-  // },
-
   devServer: {
     port: 3002
   },
@@ -94,6 +86,18 @@ export default defineNuxtConfig({
           ? { preset: ['default', { discardComments: { removeAll: true } }] }
           : false, // disable cssnano when not in production
     },
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: ['eventemitter3']
+    },
+
+    server: {
+      hmr: {
+        clientPort: 3002
+      }
+    }
   }
 
 })
