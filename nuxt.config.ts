@@ -22,7 +22,7 @@ export default defineNuxtConfig({
     '@/assets/css/normalize.css',
     '@/assets/css/webflow.css',
     '@/assets/css/genaire-restake.webflow.css',
-    // '~/assets/css/others/main.css'
+    '@/assets/css/others/main.css',
   ],
 
   devServer: {

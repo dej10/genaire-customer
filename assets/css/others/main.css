@@ -1,1 +1,45 @@
 @import './transitions.css';
+
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+  margin-right: 2px;
+}
+
+.text-block{
+  color : white
+}
+
+li{
+list-style: none ;
+}
+
+
+.block{
+display: block;
+}
+
+
+.small.primary.outline{
+  border: 1px solid var(--yellow);
+  background-color: transparent;
+  color: white;
+}
+
+
+.hide{
+  display: none;
+}
+
+
+input{
+  color : black
+}

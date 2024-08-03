@@ -11,7 +11,7 @@
             The EigenLayer Liquid Restaking Hub
           </div>
         </div>
-        <NuxtLink class="primary w-button btn" to="#">
+        <NuxtLink class="primary w-button btn" to="/restake">
           Restake
         </NuxtLink>
       </div>

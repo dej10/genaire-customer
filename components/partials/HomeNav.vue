@@ -45,7 +45,9 @@
               </li>
               <li class="mobile-margin-top">
                 <div class="nav-button-wrapper">
-                  <a class="small primary w-button btn" href="#">Restake</a>
+                  <NuxtLink class="small primary w-button btn" to="restake">
+                    Restake
+                  </NuxtLink>
                 </div>
               </li>
             </ul>
