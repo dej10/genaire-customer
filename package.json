@@ -19,7 +19,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@tanstack/vue-query": "^5.37.1",
+    "@tanstack/vue-query": "5.37.1",
     "@wagmi/core": "^2.10.3",
     "@wagmi/vue": "^0.0.8",
     "eventemitter3": "^5.0.1",

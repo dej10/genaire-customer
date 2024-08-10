@@ -67,7 +67,7 @@
                 <div class="restake-input-p last">
                   <div class="restake-input-p-t">
                     <input
-                      v-model="formData.amount"
+                      v-model="amount"
                       class="coin-input borde outlin-none bg-transparent"
                       placeholder="0.00"
                       type="number"
@@ -157,9 +157,6 @@
             <div v-if="isConfirmed">
               Transaction confirmed!
             </div>
-            <div v-if="TransactionError">
-              Error: {{ TransactionError.message }}
-            </div>
           </div>
         </div>
       </div>
@@ -175,15 +172,13 @@ import abi from '~/abi.json'
 
 const { address: userAddress } = useAccount()
 
-const { data: hash, writeContract, isError, error } = useWriteContract()
+const { data: hash, writeContract } = useWriteContract()
 
 const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
   hash,
 })
 
-const formData = ref({
-  amount: 1000
-})
+const amount = ref(1000)
 
 const tokenAddress = ref('0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9')
 
@@ -198,7 +193,7 @@ const deposit = async () => {
       address: tokenAddress.value as `0x${string}`,
       abi,
       functionName: 'deposit',
-      args: [parseEther(String(formData.value.amount))],
+      args: [parseEther(String(amount.value))],
     })
   }
   catch (err) {
