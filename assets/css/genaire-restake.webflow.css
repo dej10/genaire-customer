@@ -5,6 +5,11 @@
   --light-black: #252525;
 }
 
+input {
+  background-color: transparent;
+  color: white !important;
+}
+
 .w-layout-vflex {
   flex-direction: column;
   align-items: flex-start;

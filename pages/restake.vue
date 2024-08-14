@@ -23,10 +23,12 @@
                 </div>
               </div>
               <div class="restake-input">
-                <div class="restake-coin first">
+                <div v-if="selectTokenMenuOpen" class="select-token-container" ><SelectToken @close="toggleSelectTokenMenu" /></div>
+                <button  @click="toggleSelectTokenMenu" class="restake-coin first">
                   <img alt="" class="coin-img" loading="lazy" src="/images/ethcoin_1ethcoin.png">
                   <div>WETH</div>
-                </div>
+                  <img src="/images/chevron.svg" loading="lazy" alt="">
+                </button>
                 <div class="restake-input-p last">
                   <div class="restake-input-p-t">
                     <input
@@ -205,6 +207,12 @@ const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactio
   hash,
 })
 
+const selectTokenMenuOpen = ref(false);
+
+const toggleSelectTokenMenu = () => {
+  selectTokenMenuOpen.value = !selectTokenMenuOpen.value
+}
+
 onMounted(async () => {
   if (aprData.value)
     apr.value = Number(aprData.value) / 100
@@ -293,5 +301,16 @@ const buttonText = computed(() => {
 <style scoped>
 .large.primary.w-button.btn{
   cursor: pointer;
+}
+
+.restake-input{
+  position: relative;
+}
+
+.select-token-container {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  z-index: 5;
 }
 </style>
