@@ -12,43 +12,6 @@
             </div>
           </div>
           <div class="restake-body-content">
-            <div class="restake-settings">
-              <div class="w-layout-hflex settings-control">
-                <div class="restake-item-title">
-                  Settings
-                </div><img alt="" loading="lazy" src="/images/chevron.svg">
-              </div>
-              <div v-if="false" class="w-layout-vflex settings-slippage">
-                <div>Adjust slippage</div>
-                <div class="slippage-btns">
-                  <div class="slippage-btn first active">
-                    <div>1%</div>
-                  </div>
-                  <div class="slippage-btn">
-                    <div>3%</div>
-                  </div>
-                  <div class="slippage-btn">
-                    <div>5%</div>
-                  </div>
-                  <div class="slippage-btn last">
-                    <div>Custom</div>
-                  </div>
-                </div>
-              </div>
-              <div v-if="false" class="w-layout-vflex settings-deadline">
-                <div class="deadline-label">
-                  Adjust deadline
-                </div>
-                <div class="w-layout-vflex deadline-field">
-                  <input
-                    class="slippage-value bg-transparent text-center text-white"
-                    placeholder="10"
-                    type="number"
-                  >
-                  <div>Minutes</div>
-                </div>
-              </div>
-            </div>
             <div class="restake-stake">
               <div class="w-layout-hflex settings-control">
                 <div class="restake-item-title">
@@ -56,13 +19,13 @@
                 </div>
                 <div class="w-layout-hflex restake-balance">
                   <div>Balance:</div>
-                  <div>0.00</div>
+                  <div>{{ formatEther(balance?.value || 0n) }} WETH</div>
                 </div>
               </div>
               <div class="restake-input">
                 <div class="restake-coin first">
                   <img alt="" class="coin-img" loading="lazy" src="/images/ethcoin_1ethcoin.png">
-                  <div>ETH</div><img alt="" loading="lazy" src="/images/chevron.svg">
+                  <div>WETH</div>
                 </div>
                 <div class="restake-input-p last">
                   <div class="restake-input-p-t">
@@ -72,13 +35,13 @@
                       placeholder="0.00"
                       type="number"
                     >
-                    <div class="max-btn">
+                    <div class="max-btn" @click="setMaxAmount">
                       <div>MAX</div>
                     </div>
                   </div>
                   <div class="restake-input-divider" />
                   <div class="restake-input-p-b">
-                    <div>$0.00</div>
+                    <div>${{ calculateUsdValue(amount) }}</div>
                   </div>
                 </div>
               </div>
@@ -90,25 +53,27 @@
                 </div>
                 <div class="w-layout-hflex restake-balance">
                   <div>Balance:</div>
-                  <div>0.00</div>
+                  <div>{{ formatEther(gnETHBalance?.value || 0n) }} gnETH</div>
                 </div>
               </div>
               <div class="restake-input">
                 <div class="restake-receive first">
                   <img alt="" class="coin-img" loading="lazy" src="/images/ezETH_1ezETH.png">
-                  <div>ezETH</div>
+                  <div>gnETH</div>
                 </div>
                 <div class="restake-input-p last">
                   <div class="restake-input-p-t">
                     <input
                       class="coin-input borde outlin-none bg-transparent text-white"
+                      disabled
                       placeholder="0.00"
                       type="number"
+                      :value="amount"
                     >
                   </div>
                   <div class="restake-input-divider" />
                   <div class="restake-input-p-b">
-                    <div>$0.00</div>
+                    <div>${{ calculateUsdValue(amount) }}</div>
                   </div>
                 </div>
               </div>
@@ -120,19 +85,19 @@
             <div class="restake-total-item-name">
               APR
             </div>
-            <div>1.41%</div>
+            <div>{{ apr }}%</div>
           </div>
           <div class="restake-totals-row">
             <div class="restake-total-item-name">
               Exchange Rate
             </div>
-            <div>1 ETH = 0.99175 ezETH</div>
+            <div>1 WETH = 1 gnETH</div>
           </div>
           <div class="restake-totals-row">
             <div class="restake-total-item-name">
               Transaction Cost
             </div>
-            <div>~ $17.48</div>
+            <div>~ ${{ estimatedGasCost }}</div>
           </div>
           <div class="restake-totals-row">
             <div class="restake-total-item-name">
@@ -141,23 +106,30 @@
             <div>10%</div>
           </div>
         </div>
-        <a class="large primary w-button btn" @click.prevent="deposit">Restake</a>
+        <button
+          class="large primary w-button btn"
+          :disabled="!isConnected || isPending || !hasAllowance"
+          @click="deposit"
+        >
+          {{ buttonText }}
+        </button>
 
-        <div>
-          <div v-if="!userAddress">
-            Please connect your wallet
+        <div v-if="isConnected">
+          <div v-if="hash">
+            Transaction Hash: {{ hash }}
           </div>
-          <div v-else>
-            <div v-if="hash">
-              Transaction Hash: {{ hash }}
-            </div>
-            <div v-if="isConfirming">
-              Confirming transaction...
-            </div>
-            <div v-if="isConfirmed">
-              Transaction confirmed!
-            </div>
+          <div v-if="isConfirming">
+            Confirming transaction...
           </div>
+          <div v-if="isConfirmed">
+            Transaction confirmed!
+          </div>
+          <div v-if="error">
+            Error: {{ error.message }}
+          </div>
+        </div>
+        <div v-else>
+          Please connect your wallet
         </div>
       </div>
     </div>
@@ -165,43 +137,145 @@
 </template>
 
 <script setup lang="ts">
-import { useAccount, useWaitForTransactionReceipt, useWriteContract } from '@wagmi/vue'
-import { parseEther } from 'viem'
+import { useAccount, useBalance, useEstimateGas, useReadContract, useWaitForTransactionReceipt, useWriteContract } from '@wagmi/vue'
+import { erc20Abi, formatEther, parseEther } from 'viem'
 
-import abi from '~/abi.json'
+import { getGasPrice } from '@wagmi/core'
+import { config } from '../wagmi-config'
+import contractABI from '~/abi.json'
 
-const { address: userAddress } = useAccount()
+const gasPrice = await getGasPrice(config)
 
-const { data: hash, writeContract } = useWriteContract()
+const contractAddress = '0x7103f3452B2bF777729b901Fb209fc445091dcaB'
+const wethAddress = '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9'
+
+const { address, isConnected } = useAccount()
+const amount = ref(0)
+const apr = ref(0)
+const estimatedGasCost = ref(0)
+
+// Get WETH balance
+const { data: balance } = useBalance({
+  address,
+  token: wethAddress,
+})
+
+// Get gnETH balance
+const { data: gnETHBalance } = useBalance({
+  address,
+  token: contractAddress,
+})
+
+// Get APR from contract
+const { data: aprData } = useReadContract({
+  address: contractAddress,
+  abi: contractABI,
+  functionName: 'apr',
+})
+
+// Check WETH allowance
+const { data: allowance } = useReadContract({
+  address: wethAddress,
+  abi: erc20Abi,
+  functionName: 'allowance',
+  args: [address.value, contractAddress],
+})
+
+const hasAllowance = computed(() => {
+  if (!allowance.value || !amount.value)
+    return false
+  return allowance.value >= parseEther(String(amount.value))
+})
+
+// Approve WETH spending
+const { writeContractAsync: approveWETH } = useWriteContract({
+  address: wethAddress,
+  abi: erc20Abi,
+  functionName: 'approve',
+})
+
+// Deposit function
+const { data: hash, error, isPending, writeContractAsync: writeContract } = useWriteContract({
+  address: contractAddress,
+  abi: contractABI,
+  functionName: 'deposit',
+})
 
 const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
   hash,
 })
 
-const amount = ref(1000)
+onMounted(async () => {
+  if (aprData.value)
+    apr.value = Number(aprData.value) / 100
 
-const tokenAddress = ref('0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9')
+  const gasEstimate = useEstimateGas({
+    gasPrice,
+    gasLimit: 200000n,
+  })
+
+  estimatedGasCost.value = Number(formatEther(gasEstimate))
+
+  console.log('Estimated gas cost:', estimatedGasCost.value)
+})
+
+const setMaxAmount = () => {
+  amount.value = formatEther(balance.value?.value || 0n)
+}
+
+const calculateUsdValue = (amount: string) => {
+  // Implement price fetching logic here
+  const ethPrice = 2000 // Placeholder, replace with actual ETH price
+  return (Number.parseFloat(amount) * ethPrice).toFixed(2)
+}
+
+const buttonText = computed(() => {
+  if (!isConnected)
+    return 'Connect Wallet'
+  if (!hasAllowance.value)
+    return 'Approve WETH'
+  if (isPending)
+    return 'Pending...'
+  return 'Restake'
+})
 
 const deposit = async () => {
-  if (!userAddress) {
-    console.error('No account connected')
+  if (!isConnected || !address.value) {
+    console.error('Wallet not connected')
     return
   }
 
   try {
-    await writeContract({
-      address: tokenAddress.value as `0x${string}`,
-      abi,
+    if (!hasAllowance.value) {
+      // Approve WETH spending
+      const approvalResult = await approveWETH({
+        address: wethAddress, // Make sure this is defined
+        abi: erc20Abi, // Make sure this is imported
+        functionName: 'approve',
+        args: [contractAddress, parseEther(amount.value)],
+      })
+
+      if (approvalResult)
+        await useWaitForTransactionReceipt({ hash: approvalResult })
+    }
+
+    // Deposit WETH
+    const depositResult = await writeContract({
+      address: contractAddress,
+      abi: contractABI, // Make sure this is defined
       functionName: 'deposit',
-      args: [parseEther(String(amount.value))],
+      args: [parseEther(amount.value)],
     })
+
+    if (depositResult)
+      console.log('Deposit transaction hash:', depositResult)
   }
   catch (err) {
-    console.error('Failed to send transaction:', err)
+    console.error('Failed to deposit:', err)
   }
 }
 </script>
 
 <style scoped>
-
+/* Add any additional styles here */
 </style>

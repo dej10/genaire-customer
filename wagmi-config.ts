@@ -35,3 +35,8 @@ declare module '@wagmi/vue' {
     config: typeof config
   }
 }
+declare module '@wagmi' {
+  interface Register {
+    config: typeof config
+  }
+}
