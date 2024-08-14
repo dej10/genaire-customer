@@ -108,8 +108,7 @@
         </div>
         <button
           class="large primary w-button btn"
-          :disabled="!isConnected || isPending || !hasAllowance"
-          @click="deposit"
+          @click.stop="handlePay"
         >
           {{ buttonText }}
         </button>
@@ -148,6 +147,7 @@ const gasPrice = await getGasPrice(config)
 
 const contractAddress = '0x7103f3452B2bF777729b901Fb209fc445091dcaB'
 const wethAddress = '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9'
+const approvalResult = ref(null)
 
 const { address, isConnected } = useAccount()
 const amount = ref(0)
@@ -229,53 +229,69 @@ const calculateUsdValue = (amount: string) => {
   return (Number.parseFloat(amount) * ethPrice).toFixed(2)
 }
 
-const buttonText = computed(() => {
-  if (!isConnected)
-    return 'Connect Wallet'
-  if (!hasAllowance.value)
-    return 'Approve WETH'
-  if (isPending)
-    return 'Pending...'
-  return 'Restake'
-})
+const approve = async () => {
+  approvalResult.value = await approveWETH({
+    address: wethAddress, // Make sure this is defined
+    abi: erc20Abi, // Make sure this is imported
+    functionName: 'approve',
+    args: [contractAddress, parseEther(String(amount.value))],
+  })
+
+  await useWaitForTransactionReceipt({ hash: approvalResult, config })
+}
 
 const deposit = async () => {
   if (!isConnected || !address.value) {
-    console.error('Wallet not connected')
-    return
+    console.log('Wallet not connected')
+    return false
   }
 
-  try {
-    if (!hasAllowance.value) {
-      // Approve WETH spending
-      const approvalResult = await approveWETH({
-        address: wethAddress, // Make sure this is defined
-        abi: erc20Abi, // Make sure this is imported
-        functionName: 'approve',
-        args: [contractAddress, parseEther(amount.value)],
-      })
-
-      if (approvalResult)
-        await useWaitForTransactionReceipt({ hash: approvalResult })
-    }
-
-    // Deposit WETH
+  // Deposit WETH
+  {
     const depositResult = await writeContract({
       address: contractAddress,
-      abi: contractABI, // Make sure this is defined
+      abi: contractABI,
       functionName: 'deposit',
-      args: [parseEther(amount.value)],
+      args: [parseEther(String(amount.value))],
     })
+
+    console.log('Deposit transaction hash:', depositResult)
 
     if (depositResult)
       console.log('Deposit transaction hash:', depositResult)
   }
-  catch (err) {
-    console.error('Failed to deposit:', err)
-  }
 }
+
+const handlePay = () => {
+  if (!hasAllowance.value)
+    approve()
+
+  if (isPending)
+    approve()
+
+  if (balance)
+    deposit()
+}
+
+const buttonText = computed(() => {
+  if (!isConnected)
+    return 'Connect Wallet'
+
+  if (!hasAllowance.value)
+    return 'Approve WETH'
+
+  if (balance)
+    return 'Restake'
+
+  if (isPending)
+    return 'Pending'
+
+  return 'Restake'
+})
 </script>
 
 <style scoped>
-/* Add any additional styles here */
+.large.primary.w-button.btn{
+  cursor: pointer;
+}
 </style>
