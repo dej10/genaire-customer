@@ -45,7 +45,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/nitro/**': { proxy: '/api/**' },
-    // 'portfolio': { ssr: false }
+    'portfolio': { ssr: false }
   },
 
   components: [

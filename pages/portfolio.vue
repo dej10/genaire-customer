@@ -48,7 +48,7 @@
             <div class="w-layout-hflex port-stats-value">
               <img alt="" class="port-stats-img" loading="lazy" src="/images/port-eth_1port-eth.png">
               <div class="portfolio-stats-value">
-                {{ gnPoints }} Pts
+                {{ formatGnPoints(gnPoints) }} Pts
               </div>
             </div>
           </div>
@@ -169,42 +169,44 @@ const { data: gnPointsData } = useReadContract({
   args: [address.value],
 })
 
+const formatGnPoints = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 2 })
 console.log('gnPointsData:', gnPointsData.value)
 
+const safeNumber = (value: any) => {
+  const num = Number(value)
+  return Number.isNaN(num) ? 0 : num
+}
+
+const ethPrice = ref(0)
 // Fetch ETH price
 const fetchEthPrice = async () => {
   try {
     const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
     const data = await response.json()
-    return data.ethereum.usd
+    ethPrice.value = data.ethereum.usd
+
+    // Calculate total balance in USD
+    const ethBalanceUsd = safeNumber(formatEther(ethBalance.value?.value || 0n)) * safeNumber(ethPrice.value)
+    const wethBalanceUsd = safeNumber(formatEther(wethBalance.value?.value || 0n)) * safeNumber(ethPrice.value)
+    const gnEthBalanceUsd = safeNumber(formatEther(gnEthBalance.value?.value || 0n)) * safeNumber(ethPrice.value)
+
+    totalBalanceUsd.value = ethBalanceUsd + wethBalanceUsd + gnEthBalanceUsd
   }
   catch (error) {
     console.error('Error fetching ETH price:', error)
-    return 0
+    return false
   }
 }
 
-const safeNumber = (value) => {
-  const num = Number(value)
-  return Number.isNaN(num) ? 0 : num
-}
-
 const initializeUserData = async () => {
-  console.log('isConnected:', isConnected.value)
-
-  const ethPrice = await fetchEthPrice()
-  console.log('ethPrice:', ethPrice)
-
-  // Calculate total balance in USD
-  const ethBalanceUsd = safeNumber(formatEther(ethBalance.value?.value || 0n)) * safeNumber(ethPrice)
-  const wethBalanceUsd = safeNumber(formatEther(wethBalance.value?.value || 0n)) * safeNumber(ethPrice)
-  const gnEthBalanceUsd = safeNumber(formatEther(gnEthBalance.value?.value || 0n)) * safeNumber(ethPrice)
-
-  totalBalanceUsd.value = ethBalanceUsd + wethBalanceUsd + gnEthBalanceUsd
+  await fetchEthPrice()
 
   // Set gnPoints
-  gnPoints.value = Number(formatEther(gnPointsData.value as bigint || 0n))
-  console.log(Number.parseFloat(String(gnPoints.value)))
+  const rawGnPoints = Number(gnPointsData.value || 0n)
+
+  gnPoints.value = rawGnPoints
+  console.log('Raw gnPoints:', rawGnPoints)
+  console.log('Formatted gnPoints:', formatGnPoints(rawGnPoints))
 
   // Set user assets
   userAssets.value = [
@@ -213,7 +215,7 @@ const initializeUserData = async () => {
       symbol: 'ETH',
       chain: 'Ethereum',
       icon: '/images/eth_2eth.png',
-      price: ethPrice,
+      price: ethPrice.value,
       quantity: Number(formatEther(ethBalance.value?.value || 0n)),
     },
     {
@@ -221,7 +223,7 @@ const initializeUserData = async () => {
       symbol: 'WETH',
       chain: 'Ethereum',
       icon: '/images/weth_icon.png',
-      price: ethPrice,
+      price: ethPrice.value,
       quantity: Number(formatEther(wethBalance.value?.value || 0n)),
     },
     {
@@ -229,59 +231,23 @@ const initializeUserData = async () => {
       symbol: 'gnETH',
       chain: 'Ethereum',
       icon: '/images/gneth_icon.png',
-      price: ethPrice,
+      price: ethPrice.value,
       quantity: Number(formatEther(gnEthBalance.value?.value || 0n)),
     }
   ]
 }
 
-// Use the function in onMounted
 onMounted(() => {
   initializeUserData()
 })
 
 onMounted(async () => {
-  console.log('isConnected:', isConnected.value)
-  // if (isConnected.value) {
-  const ethPrice = await fetchEthPrice()
-
-  console.log('ethPrice:', ethPrice)
-
   // Calculate total balance in USD
-  const ethBalanceUsd = safeNumber(formatEther(ethBalance.value?.value || 0n)) * safeNumber(ethPrice)
-  const wethBalanceUsd = safeNumber(formatEther(wethBalance.value?.value || 0n)) * safeNumber(ethPrice)
-  const gnEthBalanceUsd = safeNumber(formatEther(gnEthBalance.value?.value || 0n)) * safeNumber(ethPrice)
+  const ethBalanceUsd = safeNumber(formatEther(ethBalance.value?.value || 0n)) * safeNumber(ethPrice.value)
+  const wethBalanceUsd = safeNumber(formatEther(wethBalance.value?.value || 0n)) * safeNumber(ethPrice.value)
+  const gnEthBalanceUsd = safeNumber(formatEther(gnEthBalance.value?.value || 0n)) * safeNumber(ethPrice.value)
 
   totalBalanceUsd.value = ethBalanceUsd + wethBalanceUsd + gnEthBalanceUsd
-
-  // Set gnPoints
-  gnPoints.value = Number(formatEther(gnPointsData.value as bigint || 0n))
-  console.log(Number.parseFloat(String(gnPoints.value)))
-
-  // Set user assets
-  userAssets.value = [{
-    name: 'Ethereum',
-    symbol: 'ETH',
-    chain: 'Ethereum',
-    icon: '/images/eth_2eth.png',
-    price: ethPrice,
-    quantity: Number(formatEther(ethBalance.value?.value || 0n)),
-  }, {
-    name: 'Wrapped Ethereum',
-    symbol: 'WETH',
-    chain: 'Ethereum',
-    icon: '/images/weth_icon.png',
-    price: ethPrice,
-    quantity: Number(formatEther(wethBalance.value?.value || 0n)),
-  }, {
-    name: 'Genaire ETH',
-    symbol: 'gnETH',
-    chain: 'Ethereum',
-    icon: '/images/gneth_icon.png',
-    price: ethPrice,
-    quantity: Number(formatEther(gnEthBalance.value?.value || 0n)),
-  }]
-  // }
 })
 </script>
 
