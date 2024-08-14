@@ -32,6 +32,7 @@
                     <input
                       v-model="amount"
                       class="coin-input borde outlin-none bg-transparent"
+                      :max="formatEther(balance?.value || 0n)"
                       placeholder="0.00"
                       type="number"
                     >
@@ -274,19 +275,16 @@ const handlePay = () => {
 }
 
 const buttonText = computed(() => {
-  if (!isConnected)
+  if (!isConnected.value)
     return 'Connect Wallet'
-
-  if (!hasAllowance.value)
-    return 'Approve WETH'
-
-  if (balance)
+  else if (!hasAllowance.value)
     return 'Restake'
-
-  if (isPending)
+  else if (balance.value)
+    return 'Restake'
+  else if (isPending)
     return 'Pending'
-
-  return 'Restake'
+  else
+    return 'Restake'
 })
 </script>
 
