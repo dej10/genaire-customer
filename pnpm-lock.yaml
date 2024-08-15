@@ -14,6 +14,9 @@ dependencies:
   '@wagmi/vue':
     specifier: ^0.0.8
     version: 0.0.8(@tanstack/vue-query@5.37.1)(nuxt@3.11.2)(react-i18next@13.5.0)(react-native@0.74.5)(react@18.3.1)(typescript@5.4.3)(viem@2.12.5)(vue@3.4.35)
+  chart.js:
+    specifier: ^4.4.3
+    version: 4.4.3
   eventemitter3:
     specifier: ^5.0.1
     version: 5.0.1
@@ -23,6 +26,9 @@ dependencies:
   vue:
     specifier: ^3.4.35
     version: 3.4.35(typescript@5.4.3)
+  vue-chartjs:
+    specifier: ^5.3.1
+    version: 5.3.1(chart.js@4.4.3)(vue@3.4.35)
   vue-router:
     specifier: ^4.4.2
     version: 4.4.2(vue@3.4.35)
@@ -2460,6 +2466,10 @@ packages:
       - supports-color
     dev: true
 
+  /@kurkle/color@0.3.2:
+    resolution: {integrity: sha512-fuscdXJ9G1qb7W8VdHi+IwRqij3lBkosAm4ydQtEmbY58OzHXqQhvlxqEkoz0yssNVn38bcpRWgA9PP+OGoisw==}
+    dev: false
+
   /@kwsites/file-exists@1.1.1:
     resolution: {integrity: sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==}
     dependencies:
@@ -2692,7 +2702,7 @@ packages:
       i18next: 22.5.1
       qr-code-styling: 1.6.0-rc.1
       react: 18.3.1
-      react-i18next: 13.5.0(i18next@22.5.1)(react-native@0.74.5)(react@18.3.1)
+      react-i18next: 13.5.0(i18next@23.11.5)(react-native@0.74.5)(react@18.3.1)
       react-native: 0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3)(react@18.3.1)
     dev: false
 
@@ -6367,6 +6377,13 @@ packages:
     resolution: {integrity: sha512-mKKUkUbhPpQlCOfIuZkvSEgktjPFIsZKRRbC6KWVEMvlzblj3i3asQv5ODsrwt0N3pHAEvjP8KTQPHkp0+6jOg==}
     dev: true
 
+  /chart.js@4.4.3:
+    resolution: {integrity: sha512-qK1gkGSRYcJzqrrzdR6a+I0vQ4/R+SoODXyAjscQ/4mzuNzySaMCd+hyVxitSY1+L2fjPD1Gbn+ibNqRmwQeLw==}
+    engines: {pnpm: '>=8'}
+    dependencies:
+      '@kurkle/color': 0.3.2
+    dev: false
+
   /chokidar@3.6.0:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
     engines: {node: '>= 8.10.0'}
@@ -8518,7 +8535,6 @@ packages:
 
   /idb-keyval@6.2.1:
     resolution: {integrity: sha512-8Sb3veuYCyrZL+VBt9LJfZjLUPWVvqn8tG28VqYNFCo43KHcKuq+b4EiXGeuaLAQWL2YmyDgMp2aSpH9JHsEQg==}
-    dev: false
 
   /ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -10228,7 +10244,7 @@ packages:
       unimport: 3.10.0(rollup@4.20.0)
       unplugin: 1.12.1
       unplugin-vue-router: 0.7.0(vue-router@4.4.2)(vue@3.4.35)
-      unstorage: 1.10.2(ioredis@5.4.1)
+      unstorage: 1.10.2(idb-keyval@6.2.1)
       untyped: 1.4.2
       vue: 3.4.35(typescript@5.4.3)
       vue-bundle-renderer: 2.1.0
@@ -11214,7 +11230,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /react-i18next@13.5.0(i18next@22.5.1)(react-native@0.74.5)(react@18.3.1):
+  /react-i18next@13.5.0(i18next@23.11.5)(react-native@0.74.5)(react@18.3.1):
     resolution: {integrity: sha512-CFJ5NDGJ2MUyBohEHxljOq/39NQ972rh1ajnadG9BjTk+UXbHLq4z5DKEbEQBDoIhUmmbuS/fIMJKo6VOax1HA==}
     peerDependencies:
       i18next: '>= 23.2.3'
@@ -11229,7 +11245,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.25.0
       html-parse-stringify: 3.0.1
-      i18next: 22.5.1
+      i18next: 23.11.5
       react: 18.3.1
       react-native: 0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.3)(react@18.3.1)
     dev: false
@@ -12626,7 +12642,6 @@ packages:
       ufo: 1.5.4
     transitivePeerDependencies:
       - uWebSockets.js
-    dev: false
 
   /unstorage@1.10.2(ioredis@5.4.1):
     resolution: {integrity: sha512-cULBcwDqrS8UhlIysUJs2Dk0Mmt8h7B0E6mtR+relW9nZvsf/u4SkAYyNliPiPW7XtFNb5u3IUMkxGxFTTRTgQ==}
@@ -13069,6 +13084,16 @@ packages:
     resolution: {integrity: sha512-uZ+5ZJdZ/b43gMblWtcpikY6spJd0nERaM/1RtgioXNfWFbjKlUwrS8HlrddN6T2xtptmOouWclxLUkpgcVX3Q==}
     dependencies:
       ufo: 1.5.4
+
+  /vue-chartjs@5.3.1(chart.js@4.4.3)(vue@3.4.35):
+    resolution: {integrity: sha512-rZjqcHBxKiHrBl0CIvcOlVEBwRhpWAVf6rDU3vUfa7HuSRmGtCslc0Oc8m16oAVuk0erzc1FCtH1VCriHsrz+A==}
+    peerDependencies:
+      chart.js: ^4.1.1
+      vue: ^3.0.0-0 || ^2.7.0
+    dependencies:
+      chart.js: 4.4.3
+      vue: 3.4.35(typescript@5.4.3)
+    dev: false
 
   /vue-demi@0.14.10(vue@3.4.35):
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}

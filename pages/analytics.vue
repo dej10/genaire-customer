@@ -1,136 +1,108 @@
 <template>
   <PageNav />
-    <section class="page">
+  <section class="page">
     <PageStats />
     <div class="w-layout-hflex page-content">
-     <RestakeTabs />
-      <div class="w-layout-vflex tab-content analytics">
+      <RestakeTabs />
+      <div class="w-layout-vflex analytics tab-content">
         <div class="w-layout-vflex analytics-tab-content">
           <div class="analytics-body">
             <div class="w-layout-hflex analytics-header">
               <div class="w-layout-vflex analytics-title-group">
-                <div class="analytics-body-title">Total <span class="text-yellow">Restaked Value</span></div>
-                <div class="proof-title-sub">The amount of Renzo assets that are used to collateralize ezETH, refer to analytics page for details</div>
+                <div class="analytics-body-title">
+                  Total <span class="text-yellow">Restaked Value</span>
+                </div>
+                <div class="proof-title-sub">
+                  The amount of Genaire assets that are used to collateralize ezETH, refer to analytics page for details
+                </div>
               </div>
               <div class="w-layout-hflex graph-controls">
                 <div class="currency-tab">
-                  <div class="tab-btn first active">
-                    <div>US</div>
-                  </div>
-                  <div class="tab-btn last">
-                    <div>ETH</div>
-                  </div>
+                  <button class="tab-btn" :class="[{ active: currency === 'USD' }]" @click="setCurrency('USD')">
+                    US
+                  </button>
+                  <button class="tab-btn" :class="[{ active: currency === 'ETH' }]" @click="setCurrency('ETH')">
+                    ETH
+                  </button>
                 </div>
                 <div class="tabs-graph-period">
-                  <div class="tab-btn first active">
-                    <div>1D</div>
-                  </div>
-                  <div class="tab-btn">
-                    <div>1M</div>
-                  </div>
-                  <div class="tab-btn last">
-                    <div>ALL</div>
-                  </div>
+                  <button class="tab-btn" :class="[{ active: period === '1D' }]" @click="setPeriod('1D')">
+                    1D
+                  </button>
+                  <button class="tab-btn" :class="[{ active: period === '1M' }]" @click="setPeriod('1M')">
+                    1M
+                  </button>
+                  <button class="tab-btn" :class="[{ active: period === 'ALL' }]" @click="setPeriod('ALL')">
+                    ALL
+                  </button>
                 </div>
               </div>
             </div>
-            <div class="analtics-graph"></div>
+            <div class="analytics-graph">
+              <Line :data="chartData" :options="chartOptions" />
+            </div>
           </div>
           <div class="analytics-body">
             <div class="w-layout-hflex analytics-header">
-              <div class="analytics-body-title">Proof of <span class="text-yellow">Reserves</span></div>
-              <div class="proof-title-sub">The amount of Genaire assets that are used to collateralize ezETH</div>
+              <div class="analytics-body-title">
+                Proof of <span class="text-yellow">Reserves</span>
+              </div>
+              <div class="proof-title-sub">
+                The amount of Genaire assets that are used to collateralize ezETH
+              </div>
             </div>
             <div class="port-body-table-wrapper">
               <div class="port-body-table">
                 <div class="w-layout-hflex table-header">
                   <div class="col-1 title">
-                    <div>Asset</div>
+                    Asset
                   </div>
-                  <div id="w-node-_76473771-f482-5aff-b690-45112d80d0e0-edc3d6f7" class="col-2 title">
-                    <div>Price</div>
+                  <div class="col-2 title">
+                    Price
                   </div>
-                  <div id="w-node-_76473771-f482-5aff-b690-45112d80d0e3-edc3d6f7" class="col-3 title">
-                    <div class="text-block-3">Quantity</div>
+                  <div class="col-3 title">
+                    Quantity
                   </div>
-                  <div id="w-node-_76473771-f482-5aff-b690-45112d80d0e6-edc3d6f7" class="col-4 title">
-                    <div>Balance</div>
+                  <div class="col-4 title">
+                    Balance
                   </div>
                 </div>
-                <div class="w-layout-hflex table-row">
-                  <div id="w-node-_4d5803ac-c2eb-2513-4ae7-c4172b55f7e5-edc3d6f7" class="col-1 row"><img src="/images/eth_2eth.png" loading="lazy" alt="" class="port-row-img">
+                <div v-for="asset in assets" :key="asset.symbol" class="w-layout-hflex table-row">
+                  <div class="col-1 row">
+                    <img :alt="asset.name" class="port-row-img" :src="asset.icon">
                     <div class="w-layout-vflex row-assets-name">
-                      <div>Ethereum</div>
-                      <div class="port-assets-name-sub">ETH</div>
+                      <div>{{ asset.name }}</div>
+                      <div class="port-assets-name-sub">
+                        {{ asset.symbol }}
+                      </div>
                     </div>
                   </div>
-                  <div id="w-node-_76473771-f482-5aff-b690-45112d80d0f1-edc3d6f7" class="col-2 row">
-                    <div>$3,122.19</div>
+                  <div class="col-2 row">
+                    ${{ asset.price.toFixed(2) }}
                   </div>
-                  <div id="w-node-_76473771-f482-5aff-b690-45112d80d0f5-edc3d6f7" class="col-3">
-                    <div>1.02M</div>
+                  <div class="col-3">
+                    {{ asset.quantity.toFixed(2) }}{{ asset.symbol }}
                   </div>
-                  <div id="w-node-_76473771-f482-5aff-b690-45112d80d0f8-edc3d6f7" class="col-4">
-                    <div>$3.9B</div>
-                  </div>
-                </div>
-                <div class="w-layout-hflex table-row">
-                  <div id="w-node-_7fbd68e1-e354-d5ed-527c-dcf180eab99c-edc3d6f7" class="col-1 row"><img src="/images/eth_2eth.png" loading="lazy" alt="" class="port-row-img">
-                    <div class="w-layout-vflex row-assets-name">
-                      <div>Lido Staked Ether</div>
-                      <div class="port-assets-name-sub">stETH</div>
-                    </div>
-                  </div>
-                  <div id="w-node-_7fbd68e1-e354-d5ed-527c-dcf180eab9a3-edc3d6f7" class="col-2 row">
-                    <div>$3,122.19</div>
-                  </div>
-                  <div id="w-node-_7fbd68e1-e354-d5ed-527c-dcf180eab9a6-edc3d6f7" class="col-3">
-                    <div>1.02M</div>
-                  </div>
-                  <div id="w-node-_7fbd68e1-e354-d5ed-527c-dcf180eab9a9-edc3d6f7" class="col-4">
-                    <div>$3.9B</div>
+                  <div class="col-4">
+                    ${{ (asset.price * asset.quantity).toFixed(2) }}
                   </div>
                 </div>
-                <div class="w-layout-hflex table-row">
-                  <div id="w-node-_8528e88c-b6a5-deb2-4a93-bb934cf7a564-edc3d6f7" class="col-1 row"><img src="/images/eth_2eth.png" loading="lazy" alt="" class="port-row-img">
-                    <div class="w-layout-vflex row-assets-name">
-                      <div>Binance Staked Ether</div>
-                      <div class="port-assets-name-sub">wBETH</div>
-                    </div>
+                <div class="w-layout-hflex total table-row">
+                  <div class="col-1 row">
+                    Total
                   </div>
-                  <div id="w-node-_8528e88c-b6a5-deb2-4a93-bb934cf7a56b-edc3d6f7" class="col-2 row">
-                    <div>$3,122.19</div>
+                  <div class="col-2 row">
+                    Ethereum
                   </div>
-                  <div id="w-node-_8528e88c-b6a5-deb2-4a93-bb934cf7a56e-edc3d6f7" class="col-3">
-                    <div>1.02M</div>
+                  <div class="col-3">
+                    {{ totalQuantity.toFixed(2) }} ETH
                   </div>
-                  <div id="w-node-_8528e88c-b6a5-deb2-4a93-bb934cf7a571-edc3d6f7" class="col-4">
-                    <div>$3.9B</div>
-                  </div>
-                </div>
-                <div class="w-layout-hflex table-row">
-                  <div id="w-node-efded6a5-1c5b-7e2f-3e07-8422bb458aa4-edc3d6f7" class="col-1 row total">
-                    <div>Total</div>
-                  </div>
-                  <div id="w-node-efded6a5-1c5b-7e2f-3e07-8422bb458aa8-edc3d6f7" class="col-2 row">
-                    <div>Ethereum</div>
-                  </div>
-                  <div id="w-node-efded6a5-1c5b-7e2f-3e07-8422bb458aac-edc3d6f7" class="col-3">
-                    <div>$3,157.73</div>
-                  </div>
-                  <div id="w-node-efded6a5-1c5b-7e2f-3e07-8422bb458aaf-edc3d6f7" class="col-4">
-                    <div>$586,149,477</div>
+                  <div class="col-4">
+                    ${{ totalBalance.toFixed(2) }}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="analytics-body">
-            <div class="w-layout-hflex analytics-header">
-              <div class="analytics-body-title">Ciculating <span class="text-yellow">Supply</span></div>
-              <div class="proof-title-sub">The amount of ezETH that are circulating in the market</div>
-            </div>
-            <div class="port-body-table-wrapper"></div>
           </div>
         </div>
       </div>
@@ -138,12 +110,111 @@
   </section>
 </template>
 
-<script>
-export default {
-  // Component options
+<script setup lang="ts">
+import { useReadContract } from '@wagmi/vue'
+import { formatEther } from 'viem'
+import { Line } from 'vue-chartjs'
+import { CategoryScale, Chart, Legend, LineElement, LinearScale, PointElement, Title, Tooltip } from 'chart.js'
+import contractABI from '~/abi.json'
+
+Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+
+const contractAddress = '0x7103f3452B2bF777729b901Fb209fc445091dcaB'
+
+const currency = ref('USD')
+const period = ref('1D')
+const assets = ref<Record<string, any>[]>([])
+const totalValueLocked = ref(0)
+
+const chartData = ref({
+  labels: [],
+  datasets: [
+    {
+      label: 'Total Restaked Value',
+      data: [],
+      borderColor: '#FFF700',
+      tension: 0.4,
+    },
+  ],
+})
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: {
+      beginAtZero: true,
+    },
+  },
 }
+
+const generateChartData = () => {
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+  const data = [3.06, 3.24, 3.15, 3.42, 3.33, 3.42]
+  return { labels, data }
+}
+
+const updateChartData = () => {
+  const { labels, data } = generateChartData()
+  if (labels) {
+    chartData.value.labels.push(labels)
+    console.log('  chartData.value.labels:', chartData.value.labels)
+    chartData.value.datasets[0].data = data
+  }
+}
+
+const setCurrency = (newCurrency: any) => {
+  currency.value = newCurrency
+  updateChartData()
+}
+
+const setPeriod = (newPeriod: any) => {
+  period.value = newPeriod
+  updateChartData()
+}
+
+const { data: tvlData } = useReadContract({
+  address: contractAddress,
+  abi: contractABI,
+  functionName: 'totalValueLocked',
+})
+
+const fetchAssetData = async () => {
+  assets.value = [
+    { name: 'Ethereum', symbol: 'ETH', icon: '/images/eth_2eth.png', price: 3122.19, quantity: 1.02 },
+    { name: 'Lido Staked Ether', symbol: 'stETH', icon: '/images/steth_icon.png', price: 3122.19, quantity: 1.02 },
+    { name: 'Binance Staked Ether', symbol: 'wBETH', icon: '/images/wbeth_icon.png', price: 3122.19, quantity: 1.02 },
+  ]
+}
+
+const totalQuantity = computed(() => assets.value.reduce((total, asset) => total + asset.quantity, 0))
+
+const totalBalance = computed(() => assets.value.reduce((total, asset) => total + (asset.price * asset.quantity), 0))
+
+onMounted(async () => {
+  if (tvlData.value)
+    totalValueLocked.value = Number(formatEther(tvlData.value || 0n))
+
+  await fetchAssetData()
+  updateChartData()
+})
 </script>
 
 <style scoped>
-
+.analytics-graph {
+  height: 400px;
+  width: 100%;
+}
+.tab-btn {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: none;
+  background-color: transparent;
+  color: white;
+  cursor: pointer;
+}
+.tab-btn.active {
+  background-color: #FFF700;
+  color: black;
+}
 </style>
