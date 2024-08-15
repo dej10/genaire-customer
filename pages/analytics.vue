@@ -142,10 +142,14 @@ const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   scales: {
-    y: {
-      beginAtZero: true,
-    },
-  },
+    yAxes: [
+      {
+        ticks: {
+          beginAtZero: true
+        }
+      }
+    ]
+  }
 }
 
 const generateChartData = () => {
@@ -157,8 +161,7 @@ const generateChartData = () => {
 const updateChartData = () => {
   const { labels, data } = generateChartData()
   if (labels) {
-    chartData.value.labels.push(labels)
-    console.log('  chartData.value.labels:', chartData.value.labels)
+    chartData.value.labels = (labels)
     chartData.value.datasets[0].data = data
   }
 }

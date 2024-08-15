@@ -248,6 +248,23 @@ onMounted(async () => {
   const gnEthBalanceUsd = safeNumber(formatEther(gnEthBalance.value?.value || 0n)) * safeNumber(ethPrice.value)
 
   totalBalanceUsd.value = ethBalanceUsd + wethBalanceUsd + gnEthBalanceUsd
+
+  const { data: aprData } = useReadContract({
+    address: contractAddress,
+    abi: contractABI,
+    functionName: 'apr',
+  })
+
+  console.log('Current APR:', aprData.value)
+
+  const { data: userInfo } = useReadContract({
+    address: contractAddress,
+    abi: contractABI,
+    functionName: 'userInfo',
+    args: [address.value],
+  })
+
+  console.log('User deposit info:', userInfo.value)
 })
 </script>
 
