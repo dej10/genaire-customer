@@ -23,11 +23,13 @@
                 </div>
               </div>
               <div class="restake-input">
-                <div v-if="selectTokenMenuOpen" class="select-token-container" ><SelectToken @close="toggleSelectTokenMenu" /></div>
-                <button  @click="toggleSelectTokenMenu" class="restake-coin first">
+                <div v-if="selectTokenMenuOpen" class="select-token-container">
+                  <SelectToken @close="toggleSelectTokenMenu" />
+                </div>
+                <button class="restake-coin first" @click="toggleSelectTokenMenu">
                   <img alt="" class="coin-img" loading="lazy" src="/images/ethcoin_1ethcoin.png">
                   <div>WETH</div>
-                  <img src="/images/chevron.svg" loading="lazy" alt="">
+                  <img alt="" loading="lazy" src="/images/chevron.svg">
                 </button>
                 <div class="restake-input-p last">
                   <div class="restake-input-p-t">
@@ -148,7 +150,7 @@ import contractABI from '~/abi.json'
 
 const gasPrice = await getGasPrice(config)
 
-const contractAddress = '0x7103f3452B2bF777729b901Fb209fc445091dcaB'
+const contractAddress = '0xbD149d1Fce18A725198CA3EdeD58dE454Cb10B7f'
 const wethAddress = '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9'
 const approvalResult = ref(null)
 
@@ -208,7 +210,7 @@ const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactio
   hash,
 })
 
-const selectTokenMenuOpen = ref(false);
+const selectTokenMenuOpen = ref(false)
 
 const toggleSelectTokenMenu = () => {
   selectTokenMenuOpen.value = !selectTokenMenuOpen.value
