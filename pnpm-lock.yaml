@@ -32,6 +32,9 @@ dependencies:
   vue-router:
     specifier: ^4.4.2
     version: 4.4.2(vue@3.4.35)
+  vue-sonner:
+    specifier: ^1.1.5
+    version: 1.1.5
   wagmi:
     specifier: ^2.12.5
     version: 2.12.5(@tanstack/react-query@5.51.23)(react-native@0.74.5)(react@18.3.1)(typescript@5.4.3)(viem@2.12.5)
@@ -13156,6 +13159,10 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.6.3
       vue: 3.4.35(typescript@5.4.3)
+
+  /vue-sonner@1.1.5:
+    resolution: {integrity: sha512-uwtZgRs1pcqZuPJFOrNdutphZ5UVVjM4zbXMM7E2LAXTGnYIOgPmUZdWDrEeI+IGXCDsY8aRuk5bh3u4rp20Sg==}
+    dev: false
 
   /vue@3.4.35(typescript@5.4.3):
     resolution: {integrity: sha512-+fl/GLmI4GPileHftVlCdB7fUL4aziPcqTudpTGXCT8s+iZWuOCeNEB5haX6Uz2IpRrbEXOgIFbe+XciCuGbNQ==}

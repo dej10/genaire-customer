@@ -1,4 +1,4 @@
-import { createConfig, http } from '@wagmi/vue'
+import { cookieStorage, createConfig, createStorage, http } from '@wagmi/vue'
 import { base, mainnet, sepolia } from '@wagmi/vue/chains'
 import { coinbaseWallet, injected, metaMask, safe, walletConnect } from '@wagmi/vue/connectors'
 

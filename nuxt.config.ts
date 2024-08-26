@@ -45,7 +45,8 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/nitro/**': { proxy: '/api/**' },
-    'portfolio': { ssr: false }
+    'portfolio': { ssr: false },
+    'referral-program': { ssr: false }
   },
 
   components: [
@@ -89,16 +90,39 @@ export default defineNuxtConfig({
     },
   },
 
+  nitro: {
+    esbuild: {
+      options: {
+        target: 'esnext'
+      }
+    }
+  },
+
   vite: {
     optimizeDeps: {
-      include: ['eventemitter3']
+      include: ['eventemitter3'],
+      esbuildOptions: {
+        target: 'esnext',
+        // Node.js global to browser globalThis
+        define: {
+          global: 'globalThis'
+        },
+        supported: {
+          bigint: true
+        },
+      }
+    },
+
+    build: {
+      target: ['esnext'], // 👈 build.target
     },
 
     server: {
       hmr: {
         clientPort: 3002
       }
-    }
+    },
+
   }
 
 })

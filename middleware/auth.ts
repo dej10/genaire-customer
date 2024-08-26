@@ -1,10 +1,12 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const auth = useAuth().value
+import { useAccount } from '@wagmi/vue'
 
-  const pageIntended = useState('page_intended')
+export default defineNuxtRouteMiddleware(() => {
+  const { isConnected } = useAccount()
 
-  pageIntended.value = to.path !== '/login' ? to.path : pageIntended.value
+  // const pageIntended = useState('page_intended')
 
-  if (!auth.isLoggedIn)
-    return navigateTo('/login')
+  // pageIntended.value = to.path !== '/login' ? to.path : pageIntended.value
+
+  if (!isConnected.value)
+    return navigateTo('/restake')
 })

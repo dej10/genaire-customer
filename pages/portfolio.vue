@@ -134,15 +134,21 @@
 <script setup lang="ts">
 import { useAccount, useBalance, useReadContract } from '@wagmi/vue'
 import { formatEther } from 'viem'
+
+import { config } from '../wagmi-config'
 import contractABI from '~/abi.json'
 
 const contractAddress = '0x7103f3452B2bF777729b901Fb209fc445091dcaB'
 const wethAddress = '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9'
 
-const { address, isConnected } = useAccount()
+const { address } = useAccount()
 const totalBalanceUsd = ref(0)
 const gnPoints = ref(0)
 const userAssets = ref<Record<string, any>[]>([])
+
+definePageMeta({
+  middleware: ['auth']
+})
 
 // Fetch ETH balance
 const { data: ethBalance } = useBalance({
@@ -162,7 +168,7 @@ const { data: gnEthBalance } = useBalance({
 })
 
 // Fetch gnPoints from contract
-const { data: gnPointsData } = useReadContract({
+const gnPointsData = await useReadContract({
   address: contractAddress,
   abi: contractABI,
   functionName: 'gnPointsOf',
@@ -170,7 +176,6 @@ const { data: gnPointsData } = useReadContract({
 })
 
 const formatGnPoints = (value: number) => value.toLocaleString(undefined, { maximumFractionDigits: 2 })
-console.log('gnPointsData:', gnPointsData.value)
 
 const safeNumber = (value: any) => {
   const num = Number(value)
@@ -249,22 +254,22 @@ onMounted(async () => {
 
   totalBalanceUsd.value = ethBalanceUsd + wethBalanceUsd + gnEthBalanceUsd
 
-  const { data: aprData } = useReadContract({
+  const aprData = await useReadContract({
     address: contractAddress,
     abi: contractABI,
     functionName: 'apr',
   })
 
-  console.log('Current APR:', aprData.value)
+  console.log('Current APR:', aprData)
 
-  const { data: userInfo } = useReadContract({
+  const userInfo = await useReadContract({
     address: contractAddress,
     abi: contractABI,
     functionName: 'userInfo',
     args: [address.value],
   })
 
-  console.log('User deposit info:', userInfo.value)
+  console.log('User deposit info:', userInfo)
 })
 </script>
 

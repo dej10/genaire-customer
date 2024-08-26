@@ -1,8 +1,12 @@
 <template>
+  <Toaster richColors theme="dark" />
+  <NuxtLoadingIndicator color="#F7ED6D" :height="5" :throttle="0" />
   <NuxtPage />
 </template>
 
 <script setup lang="ts">
+import { Toaster } from 'vue-sonner'
+
 const isOnline = useOnline()
 const toast = useToast({
   slot: { icon: false },

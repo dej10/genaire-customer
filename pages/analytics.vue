@@ -114,10 +114,10 @@
 import { useReadContract } from '@wagmi/vue'
 import { formatEther } from 'viem'
 import { Line } from 'vue-chartjs'
-import { CategoryScale, Chart, Legend, LineElement, LinearScale, PointElement, Title, Tooltip } from 'chart.js'
+import { CategoryScale, Chart as ChartJS, Legend, LineElement, LinearScale, PointElement, Title, Tooltip } from 'chart.js'
 import contractABI from '~/abi.json'
 
-Chart.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 const contractAddress = '0x7103f3452B2bF777729b901Fb209fc445091dcaB'
 
@@ -142,13 +142,9 @@ const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   scales: {
-    yAxes: [
-      {
-        ticks: {
-          beginAtZero: true
-        }
-      }
-    ]
+    y: {
+      beginAtZero: true
+    }
   }
 }
 
@@ -160,18 +156,23 @@ const generateChartData = () => {
 
 const updateChartData = () => {
   const { labels, data } = generateChartData()
-  if (labels) {
-    chartData.value.labels = (labels)
-    chartData.value.datasets[0].data = data
+  chartData.value = {
+    labels,
+    datasets: [
+      {
+        ...chartData.value.datasets[0],
+        data
+      }
+    ]
   }
 }
 
-const setCurrency = (newCurrency: any) => {
+const setCurrency = (newCurrency: string) => {
   currency.value = newCurrency
   updateChartData()
 }
 
-const setPeriod = (newPeriod: any) => {
+const setPeriod = (newPeriod: string) => {
   period.value = newPeriod
   updateChartData()
 }
@@ -182,7 +183,7 @@ const { data: tvlData } = useReadContract({
   functionName: 'totalValueLocked',
 })
 
-const fetchAssetData = async () => {
+const fetchAssetData = () => {
   assets.value = [
     { name: 'Ethereum', symbol: 'ETH', icon: '/images/eth_2eth.png', price: 3122.19, quantity: 1.02 },
     { name: 'Lido Staked Ether', symbol: 'stETH', icon: '/images/steth_icon.png', price: 3122.19, quantity: 1.02 },
@@ -194,11 +195,11 @@ const totalQuantity = computed(() => assets.value.reduce((total, asset) => total
 
 const totalBalance = computed(() => assets.value.reduce((total, asset) => total + (asset.price * asset.quantity), 0))
 
-onMounted(async () => {
+onMounted(() => {
   if (tvlData.value)
     totalValueLocked.value = Number(formatEther(tvlData.value || 0n))
 
-  await fetchAssetData()
+  fetchAssetData()
   updateChartData()
 })
 </script>

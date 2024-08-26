@@ -2,5 +2,9 @@
   "extends": "./.nuxt/tsconfig.json",
   "vueCompilerOptions": {
     "optionsWrapper": [false]
+  },
+  "compilerOptions": {
+    "target": "ES2020" // you can also use higher value
+  // ...
   }
 }

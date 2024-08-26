@@ -11,7 +11,7 @@
         class="small primary w-button btn"
         @click.prevent="showModal = true"
       >
-        <Icon v-if="status === 'pending'" class="animate-spin" name="gg-spinner" />
+        <Icon v-if="walletConnectStatus === 'pending'" class="animate-spin" name="gg-spinner" />
         Connect Wallet
       </a>
       <template v-else>
@@ -32,7 +32,7 @@
               class="nav-dropdown-list shadow-three mobile-shadow-hide w-dropdown-list"
               :class="{ block: isUserDropdown }"
             >
-              <a class="nav-dropdown-link-2 w-dropdown-link" href="#" @click.stop="disconnect()">Disconnect Wallet</a>
+              <a class="nav-dropdown-link-2 w-dropdown-link" href="#" @click.stop="disconnectWallet">Disconnect Wallet</a>
             </nav>
           </div>
         </li>
@@ -80,7 +80,7 @@ import coinbaseWallet from '~/assets/images/coinbase.png'
 const { vBlur } = useDirectives()
 const { isConnected, address } = useAccount()
 const { disconnect } = useDisconnect()
-const { connect, connectors, status } = useConnect()
+const { connect, connectors, status: walletConnectStatus } = useConnect()
 const isUserDropdown = ref(false)
 const showModal = ref(false)
 
@@ -90,6 +90,11 @@ const menuTrigger = () => {
 
 const menuTriggerBlur = () => {
   isUserDropdown.value = false
+}
+
+const disconnectWallet = () => {
+  disconnect()
+  navigateTo('/restake')
 }
 
 const connectWallet = async (connector: Connector) => {
@@ -110,9 +115,14 @@ const getConnectorIcon = (connector: Connector) => {
   }
   return iconMap[connector.id] || '@/images/default-wallet-icon.svg'
 }
+
+watch(walletConnectStatus, (newVal) => {
+  if (newVal === 'success')
+    toast.success('Wallet connected')
+})
 </script>
 
-<style scoped>
+<style>
 .modal {
   position: fixed;
   top: 0;
