@@ -8,6 +8,7 @@ const lodashOptions = {
 }
 export default defineNuxtConfig({
   pages: true,
+  // ssr: false,
 
   app: {
     head: {
@@ -101,7 +102,6 @@ export default defineNuxtConfig({
   vite: {
     optimizeDeps: {
       include: ['eventemitter3'],
-
     },
 
     server: {

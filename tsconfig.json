@@ -3,8 +3,8 @@
   "vueCompilerOptions": {
     "optionsWrapper": [false]
   },
+  "target": "ES2020",
   "compilerOptions": {
-    "target": "ES2020" // you can also use higher value
-  // ...
+    "target": "ES2020"
   }
 }
