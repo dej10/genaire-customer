@@ -92,6 +92,15 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+
+    rollupConfig: {
+
+      onwarn: (warning, warn) => {
+        if (warning.code === 'THIS_IS_UNDEFINED')
+          return
+        warn(warning)
+      }
+    },
     esbuild: {
       options: {
         target: 'esnext'
