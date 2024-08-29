@@ -5,7 +5,6 @@
     <PageStats />
     <div class="w-layout-hflex page-content">
       <RestakeTabs />
-      APR{{ apr }}
       <div class="w-layout-vflex restake-content referral-program">
         <div class="portfolio-body">
           <div class="w-layout-hflex port-body-header">
