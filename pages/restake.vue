@@ -182,13 +182,14 @@ import walletConnect from '~/public/images/wallet-connect.png'
 import coinbaseWallet from '~/assets/images/coinbase.png'
 import contractABI from '~/abi.json'
 
-const gasPrice = await getGasPrice(config)
+// const gasPrice = await getGasPrice(config)
 
 const contractAddress = '0x690E983090609A6564ffb405E6de990cBF7427a4'
 const wethAddress = '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9'
 const approvalResult = ref(null)
 const showModal = ref(false)
 const gnETHAmount = ref('0')
+const approvedAmount = ref(0n)
 const route = useRoute()
 
 const { address, isConnected } = useAccount()
@@ -232,11 +233,13 @@ const { data: allowance } = await useReadContract({
   args: [address.value, contractAddress],
 })
 
-const hasAllowance = computed(() => {
-  if (!allowance.value || !amount.value)
-    return false
-  return allowance.value >= parseEther(String(amount.value))
-})
+console.log('Allowance:', allowance.value)
+
+// const hasAllowance = computed(() => {
+//   if (!allowance.value || !amount.value)
+//     return false
+//   return allowance.value >= parseEther(String(amount.value))
+// })
 
 // Approve WETH spending
 const { writeContractAsync: approveWETH } = useWriteContract({
@@ -287,8 +290,6 @@ onMounted(async () => {
   if (aprData.value)
     apr.value = Number(aprData.value) / 100
 
-  console.log(gasPrice)
-
   const gasEstimate = useEstimateGas({
     account: address.value,
     to: contractAddress,
@@ -297,11 +298,14 @@ onMounted(async () => {
 
   estimatedGasCost.value = formatEther(gasEstimate)
 
-  console.log('Estimated gas cost:', estimatedGasCost.value)
-
   const referrer = route.query.ref
   if (referrer && typeof referrer === 'string')
     setUserReferrer(referrer)
+
+  if (allowance.value)
+    approvedAmount.value = allowance.value
+
+  console.log('Approved amount:', approvedAmount.value)
 })
 
 const setMaxAmount = () => {
@@ -318,22 +322,32 @@ const approve = async () => {
   if (amount.value <= 0)
     return toast.error('Amount is less than or equal to 0')
 
+  const amountToApprove = parseEther(String(amount.value))
+
   approvalResult.value = await approveWETH({
     address: wethAddress,
     abi: erc20Abi,
     functionName: 'approve',
-    args: [contractAddress, parseEther(String(amount.value))],
+    args: [contractAddress, amountToApprove],
   })
 
   const data = await useWaitForTransactionReceipt({ hash: approvalResult, config })
 
-  if (data)
+  if (data) {
+    approvedAmount.value = amountToApprove
+
     toast.success('Approval successful')
+  }
 }
 
 const deposit = async () => {
-  if (balance.value?.value < amount.value) {
-    console.error('Insufficient balance')
+  if (amount.value > Number(balance.value?.formatted)) {
+    toast.error('Insufficient balance')
+    return false
+  }
+
+  if (!amount.value) {
+    toast.error('Deposit amount is required')
     return false
   }
 
@@ -342,17 +356,19 @@ const deposit = async () => {
     return false
   }
 
-  // Deposit WETH
-  {
-    const depositResult = await writeContract({
-      address: contractAddress,
-      abi: contractABI,
-      functionName: 'deposit',
-      args: [wethAddress, parseEther(String(amount.value))],
-    })
+  const depositAmount = parseEther(String(amount.value))
 
-    if (depositResult)
-      toast.success('Deposit successful')
+  // Deposit WETH
+  const depositResult = await writeContract({
+    address: contractAddress,
+    abi: contractABI,
+    functionName: 'deposit',
+    args: [wethAddress, depositAmount],
+  })
+
+  if (depositResult) {
+    approvedAmount.value -= depositAmount
+    toast.success('Deposit successful')
   }
 }
 
@@ -360,10 +376,9 @@ const handlePay = () => {
   if (!isConnected.value)
     return showModal.value = true
 
-  if (!hasAllowance.value)
-    return approve()
+  const currentAmount = parseEther(String(amount.value))
 
-  if (isPending)
+  if (currentAmount > approvedAmount.value)
     return approve()
 
   if (balance)
@@ -373,7 +388,7 @@ const handlePay = () => {
 const buttonText = computed(() => {
   if (!isConnected.value)
     return 'Connect Wallet'
-  else if (!hasAllowance.value)
+  else if (parseEther(String(amount.value)) > approvedAmount.value)
     return 'Approve WETH'
   else if (balance.value)
     return 'Restake'
