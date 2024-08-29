@@ -41,7 +41,7 @@
     "eslint-plugin-prefer-arrow-functions": "^3.3.2",
     "eslint-plugin-tailwindcss": "^3.15.1",
     "eslint-ts-patch": "8.57.0-0",
-    "nuxt": "3.11.2",
+    "nuxt": "3.12.4",
     "nuxt-icon": "0.6.10",
     "nuxt-lodash": "2.5.3",
     "typescript": "5.4.3",
